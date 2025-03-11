@@ -6,7 +6,9 @@
   "main": "server.js",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "start": "node netlify/functions/api.js"
+    "start": "node netlify/functions/api.js",
+    "build": "npm install && mkdir -p dist && cp -r frontend/* dist/",
+    "dev": "netlify dev"
   },
   "dependencies": {
     "@netlify/functions": "^3.0.1",
