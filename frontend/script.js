@@ -7,12 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const resultsContainer = document.getElementById('recipe-results');
     const errorContainer = document.getElementById('error-message');
-    const recipeDetails = document.getElementById('recipe-details');
-    const recipeGrid = document.getElementById('recipe-grid');
-    const recipeContent = document.getElementById('recipe-content');
-    const loading = document.getElementById('loading');
-    const searchSummary = document.getElementById('search-summary');
-    const backToResults = document.getElementById('back-to-results');
 
     // Handle form submission
     form.addEventListener('submit', async (e) => {
@@ -20,7 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Clear previous results and errors
         if (resultsContainer) resultsContainer.innerHTML = '';
-        if (errorContainer) errorContainer.innerHTML = '';
+        if (errorContainer) {
+            errorContainer.innerHTML = '';
+            errorContainer.classList.add('d-none');
+        }
         
         // Show loading state
         if (resultsContainer) resultsContainer.innerHTML = '<p>Loading recipes...</p>';
@@ -79,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error:', error);
             if (errorContainer) {
+                errorContainer.classList.remove('d-none');
                 errorContainer.innerHTML = `<p class="error">${error.message}</p>`;
             }
             if (resultsContainer) {
@@ -86,112 +84,68 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+});
 
-    // Handle back to results button
-    backToResults.addEventListener('click', () => {
-        recipeDetails.classList.add('hidden');
-        resultsContainer.classList.remove('hidden');
-    });
+// Make showRecipeDetails available globally
+window.showRecipeDetails = async function(recipeId) {
+    const resultsContainer = document.getElementById('recipe-results');
+    const errorContainer = document.getElementById('error-message');
 
-    // Function to display recipe results
-    function displayResults(recipes) {
-        recipeGrid.innerHTML = '';
+    try {
+        if (resultsContainer) {
+            resultsContainer.innerHTML = '<p>Loading recipe details...</p>';
+        }
+        if (errorContainer) {
+            errorContainer.innerHTML = '';
+            errorContainer.classList.add('d-none');
+        }
+
+        const response = await fetch(`/api/recipe/${recipeId}`);
         
-        recipes.forEach(recipe => {
-            const col = document.createElement('div');
-            col.className = 'col-12 col-sm-6 col-lg-4';
-            
-            col.innerHTML = `
-                <div class="card h-100 shadow-sm">
-                    <div class="position-relative">
-                        <img src="${recipe.image}" class="card-img-top recipe-image" alt="${recipe.title}">
-                        <div class="position-absolute top-0 end-0 m-2">
-                            <span class="badge bg-dark">
-                                <i class="bi bi-clock me-1"></i>${recipe.readyInMinutes} min
-                            </span>
-                        </div>
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to fetch recipe details');
+        }
+
+        const recipe = await response.json();
+
+        if (resultsContainer) {
+            resultsContainer.innerHTML = `
+                <div class="recipe-details">
+                    <button onclick="location.reload()" class="back-button">← Back to Results</button>
+                    <h2>${recipe.title}</h2>
+                    <img src="${recipe.image}" alt="${recipe.title}">
+                    <div class="recipe-info">
+                        <p>Ready in ${recipe.readyInMinutes} minutes</p>
+                        <p>Servings: ${recipe.servings}</p>
+                        ${recipe.diets?.length ? `<p>Diets: ${recipe.diets.join(', ')}</p>` : ''}
                     </div>
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">${recipe.title}</h5>
-                        <div class="mb-3">
-                            <span class="badge bg-secondary me-1">
-                                <i class="bi bi-people me-1"></i>${recipe.servings} servings
-                            </span>
-                            ${recipe.diets.map(diet => 
-                                `<span class="badge bg-info me-1">${diet}</span>`
-                            ).join('')}
+                    <h3>Ingredients:</h3>
+                    <ul>
+                        ${recipe.extendedIngredients?.map(ing => `
+                            <li>${ing.original}</li>
+                        `).join('') || '<li>No ingredients available</li>'}
+                    </ul>
+                    <h3>Instructions:</h3>
+                    ${recipe.instructions ? `
+                        <div class="instructions">
+                            ${recipe.instructions}
                         </div>
-                        <p class="card-text flex-grow-1">${recipe.summary}</p>
-                        <button class="btn btn-primary mt-3" onclick="showRecipeDetails('${recipe.id}')">
-                            <i class="bi bi-eye me-2"></i>View Recipe
-                        </button>
-                    </div>
+                    ` : '<p>No instructions available.</p>'}
                 </div>
             `;
-            
-            recipeGrid.appendChild(col);
-        });
-    }
-
-    // Function to view recipe details
-    async function showRecipeDetails(recipeId) {
-        const resultsContainer = document.getElementById('recipe-results');
-        const errorContainer = document.getElementById('error-message');
-
-        try {
-            if (resultsContainer) {
-                resultsContainer.innerHTML = '<p>Loading recipe details...</p>';
-            }
-            if (errorContainer) {
-                errorContainer.innerHTML = '';
-            }
-
-            const response = await fetch(`/api/recipe/${recipeId}`);
-            
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Failed to fetch recipe details');
-            }
-
-            const recipe = await response.json();
-
-            if (resultsContainer) {
-                resultsContainer.innerHTML = `
-                    <div class="recipe-details">
-                        <button onclick="location.reload()" class="back-button">← Back to Results</button>
-                        <h2>${recipe.title}</h2>
-                        <img src="${recipe.image}" alt="${recipe.title}">
-                        <div class="recipe-info">
-                            <p>Ready in ${recipe.readyInMinutes} minutes</p>
-                            <p>Servings: ${recipe.servings}</p>
-                            ${recipe.diets?.length ? `<p>Diets: ${recipe.diets.join(', ')}</p>` : ''}
-                        </div>
-                        <h3>Ingredients:</h3>
-                        <ul>
-                            ${recipe.extendedIngredients?.map(ing => `
-                                <li>${ing.original}</li>
-                            `).join('') || '<li>No ingredients available</li>'}
-                        </ul>
-                        <h3>Instructions:</h3>
-                        ${recipe.instructions ? `
-                            <div class="instructions">
-                                ${recipe.instructions}
-                            </div>
-                        ` : '<p>No instructions available.</p>'}
-                    </div>
-                `;
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            if (errorContainer) {
-                errorContainer.innerHTML = `<p class="error">${error.message}</p>`;
-            }
-            if (resultsContainer) {
-                resultsContainer.innerHTML = '';
-            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        if (errorContainer) {
+            errorContainer.classList.remove('d-none');
+            errorContainer.innerHTML = `<p class="error">${error.message}</p>`;
+        }
+        if (resultsContainer) {
+            resultsContainer.innerHTML = '';
         }
     }
-});
+};
 
 async function searchRecipes() {
     const ingredients = document.getElementById('ingredients').value;
