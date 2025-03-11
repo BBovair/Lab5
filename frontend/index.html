@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Recommender</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">🔥 Recipe Recommender</h1>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="search-card p-4 mb-4">
+                    <div class="input-group mb-3">
+                        <input type="text" id="ingredients" class="form-control" placeholder="Enter ingredients (e.g., chicken, rice)">
+                    </div>
+                    <div class="mb-3">
+                        <select id="dietaryRestrictions" class="form-select">
+                            <option value="">No dietary restrictions</option>
+                            <option value="dairy-free">Dairy Free</option>
+                            <option value="gluten-free">Gluten Free</option>
+                            <option value="egg-free">Egg Free</option>
+                            <option value="nut-free">Nut Free</option>
+                            <option value="soy-free">Soy Free</option>
+                            <option value="shellfish-free">Shellfish Free</option>
+                            <option value="fish-free">Fish Free</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary w-100" onclick="searchRecipes()">Find Recipes</button>
+                </div>
+                <div id="results" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 

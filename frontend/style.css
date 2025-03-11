@@ -1,0 +1,265 @@
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+/* Card Styles */
+.card {
+    height: 100%;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Recipe Image Styles */
+.recipe-image {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+
+.recipe-detail-image {
+    height: 300px;
+    object-fit: cover;
+    width: 100%;
+}
+
+/* Badge Styles */
+.badge {
+    padding: 0.5em 0.75em;
+    font-size: 0.875rem;
+}
+
+/* List Styles */
+.list-group-item {
+    border-left: none;
+    border-right: none;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+/* Form Control Focus Styles */
+.form-control:focus,
+.form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Button Hover Effects */
+.btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .recipe-image {
+        height: 150px;
+    }
+
+    .recipe-detail-image {
+        height: 200px;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.4em 0.6em;
+    }
+
+    .list-group-item {
+        font-size: 0.9rem;
+    }
+}
+
+/* Loading Spinner */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Container Padding */
+@media (max-width: 576px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+body {
+    background-color: #f8f9fa;
+}
+
+.recipe-card {
+    margin-bottom: 20px;
+    transition: transform 0.2s;
+}
+
+.recipe-card:hover {
+    transform: translateY(-5px);
+}
+
+.recipe-image {
+    height: 200px;
+    object-fit: cover;
+}
+
+:root {
+    --primary-red: #dc3545;
+    --primary-black: #212529;
+    --accent-red: #bb2d3b;
+    --light-gray: #f8f9fa;
+}
+
+body {
+    background-color: var(--primary-black);
+    color: white;
+}
+
+.card {
+    background-color: rgba(33, 37, 41, 0.95);
+    border: 1px solid var(--primary-red);
+    margin-bottom: 20px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(220, 53, 69, 0.2);
+}
+
+.card-title {
+    color: var(--primary-red);
+}
+
+.card-text {
+    color: white;
+}
+
+.recipe-image {
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 2px solid var(--primary-red);
+}
+
+.btn-primary {
+    background-color: var(--primary-red);
+    border-color: var(--primary-red);
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-red);
+    border-color: var(--accent-red);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: var(--primary-black);
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary-red);
+    border-color: var(--primary-red);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.form-control, .form-select {
+    background-color: rgba(33, 37, 41, 0.9);
+    border: 1px solid var(--primary-red);
+    color: white;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: rgba(33, 37, 41, 0.95);
+    border-color: var(--accent-red);
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    color: white;
+}
+
+.form-select option {
+    background-color: var(--primary-black);
+    color: white;
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.2);
+    border-color: var(--primary-red);
+    color: white;
+}
+
+.alert-info {
+    background-color: rgba(33, 37, 41, 0.9);
+    border-color: var(--primary-red);
+    color: white;
+}
+
+h1 {
+    color: var(--primary-red);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* List styles */
+.list-group-item {
+    background-color: rgba(33, 37, 41, 0.95);
+    border-color: var(--primary-red);
+    color: white;
+}
+
+/* Placeholder text color */
+::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--primary-black);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-red);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-red);
+} 
