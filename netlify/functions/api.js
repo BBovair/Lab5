@@ -3,10 +3,14 @@ import fetch from "node-fetch";
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 
 export const handler = async (event) => {
-  console.log('API Key:', SPOONACULAR_API_KEY); // Log API key (first few chars)
-  console.log('Event path:', event.path);
-  console.log('Event method:', event.httpMethod);
-  console.log('Event body:', event.body);
+  // Check if API key is available
+  if (!SPOONACULAR_API_KEY) {
+    console.error('SPOONACULAR_API_KEY is not set in environment variables');
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "API configuration error" })
+    };
+  }
 
   const path = event.path;
   const method = event.httpMethod;
@@ -16,7 +20,10 @@ export const handler = async (event) => {
   if (path === "/health") {
     return {
       statusCode: 200,
-      body: JSON.stringify({ status: "ok" })
+      body: JSON.stringify({ 
+        status: "ok",
+        hasApiKey: !!SPOONACULAR_API_KEY
+      })
     };
   }
 
@@ -65,14 +72,13 @@ export const handler = async (event) => {
       }
 
       // Build the API URL with parameters
-      const searchParams = new URLSearchParams({
-        apiKey: SPOONACULAR_API_KEY,
-        query: ingredientList.join(' '),
-        number: 12,
-        addRecipeInformation: true,
-        fillIngredients: true,
-        instructionsRequired: true
-      });
+      const searchParams = new URLSearchParams();
+      searchParams.append('apiKey', SPOONACULAR_API_KEY);
+      searchParams.append('query', ingredientList.join(' '));
+      searchParams.append('number', '12');
+      searchParams.append('addRecipeInformation', 'true');
+      searchParams.append('fillIngredients', 'true');
+      searchParams.append('instructionsRequired', 'true');
 
       // Add diet if specified
       if (diet && diet !== 'none') {
@@ -84,22 +90,24 @@ export const handler = async (event) => {
         searchParams.append('intolerances', intolerances);
       }
 
-      console.log('Calling Spoonacular API with URL:', `https://api.spoonacular.com/recipes/complexSearch?${searchParams}`);
+      const apiUrl = `https://api.spoonacular.com/recipes/complexSearch?${searchParams}`;
+      console.log('Calling Spoonacular API...');
 
-      const response = await fetch(
-        `https://api.spoonacular.com/recipes/complexSearch?${searchParams}`
-      );
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Spoonacular API error:', errorData);
-        throw new Error('Failed to fetch recipes from Spoonacular');
-      }
-
+      const response = await fetch(apiUrl);
       const data = await response.json();
+      
+      console.log('Spoonacular API response status:', response.status);
       console.log('Spoonacular API response:', data);
 
       // Check for API errors
+      if (response.status === 401) {
+        console.error('Unauthorized - API key might be invalid');
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ error: "API authentication failed" })
+        };
+      }
+
       if (data.code === 402) {
         return {
           statusCode: 429,
@@ -110,7 +118,13 @@ export const handler = async (event) => {
       // Make sure we have results
       if (!data.results || !Array.isArray(data.results)) {
         console.error('Invalid response format from Spoonacular:', data);
-        throw new Error('Invalid response format from recipe service');
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ 
+            error: "Invalid response format from recipe service",
+            details: data
+          })
+        };
       }
 
       return {
@@ -125,7 +139,10 @@ export const handler = async (event) => {
       console.error('Search error:', error);
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: error.message || "Failed to fetch recipes" })
+        body: JSON.stringify({ 
+          error: "Failed to fetch recipes",
+          details: error.message
+        })
       };
     }
   }
