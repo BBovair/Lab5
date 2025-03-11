@@ -9,28 +9,43 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center mb-4">🔥 Recipe Recommender</h1>
+        <h1 class="text-center mb-4">Pantry Pal</h1>
         <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="search-card p-4 mb-4">
-                    <div class="input-group mb-3">
-                        <input type="text" id="ingredients" class="form-control" placeholder="Enter ingredients (e.g., chicken, rice)">
+            <div class="col-md-8">
+                <form id="recipe-form" class="search-card p-4 mb-4">
+                    <div class="mb-3">
+                        <label for="ingredients" class="form-label">Ingredients</label>
+                        <input type="text" id="ingredients" class="form-control" placeholder="Enter ingredients (e.g., chicken, rice)" required>
                     </div>
                     <div class="mb-3">
-                        <select id="dietaryRestrictions" class="form-select">
-                            <option value="">No dietary restrictions</option>
-                            <option value="dairy-free">Dairy Free</option>
+                        <label for="diet" class="form-label">Diet</label>
+                        <select id="diet" class="form-select">
+                            <option value="none">No dietary restrictions</option>
+                            <option value="vegetarian">Vegetarian</option>
+                            <option value="vegan">Vegan</option>
                             <option value="gluten-free">Gluten Free</option>
-                            <option value="egg-free">Egg Free</option>
-                            <option value="nut-free">Nut Free</option>
-                            <option value="soy-free">Soy Free</option>
-                            <option value="shellfish-free">Shellfish Free</option>
-                            <option value="fish-free">Fish Free</option>
+                            <option value="ketogenic">Ketogenic</option>
+                            <option value="paleo">Paleo</option>
                         </select>
                     </div>
-                    <button class="btn btn-primary w-100" onclick="searchRecipes()">Find Recipes</button>
-                </div>
-                <div id="results" class="mt-4"></div>
+                    <div class="mb-3">
+                        <label for="intolerances" class="form-label">Intolerances</label>
+                        <select id="intolerances" class="form-select">
+                            <option value="none">No intolerances</option>
+                            <option value="dairy">Dairy</option>
+                            <option value="egg">Egg</option>
+                            <option value="gluten">Gluten</option>
+                            <option value="peanut">Peanut</option>
+                            <option value="shellfish">Shellfish</option>
+                            <option value="soy">Soy</option>
+                            <option value="tree-nut">Tree Nut</option>
+                            <option value="wheat">Wheat</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Find Recipes</button>
+                </form>
+                <div id="error-message" class="alert alert-danger d-none"></div>
+                <div id="recipe-results" class="mt-4"></div>
             </div>
         </div>
     </div>
