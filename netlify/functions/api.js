@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 
-const SPOONACULAR_API_KEY = "267fe97a98554fc0ae560c5833899fe3";
+const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 
 export const handler = async (event) => {
   const path = event.path;
@@ -16,8 +16,26 @@ export const handler = async (event) => {
   }
 
   // Search recipes endpoint
-  if (path === "/api/search" && method === "GET") {
-    const { ingredients, intolerances } = params;
+  if (path === "/api/search") {
+    let ingredients, diet, intolerances;
+
+    if (method === "POST") {
+      try {
+        const body = JSON.parse(event.body);
+        ingredients = body.ingredients;
+        diet = body.diet;
+        intolerances = body.intolerances;
+      } catch (error) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ error: "Invalid request body" })
+        };
+      }
+    } else if (method === "GET") {
+      ingredients = params.ingredients;
+      diet = params.diet;
+      intolerances = params.intolerances;
+    }
     
     if (!ingredients) {
       return {
@@ -42,7 +60,6 @@ export const handler = async (event) => {
       // Build the API URL with parameters
       const searchParams = new URLSearchParams({
         apiKey: SPOONACULAR_API_KEY,
-        query: ingredientList.join(','),
         includeIngredients: ingredientList.join(','),
         addRecipeInformation: true,
         number: 12,
@@ -51,9 +68,14 @@ export const handler = async (event) => {
         sort: 'max-used-ingredients'
       });
 
+      // Add diet if specified
+      if (diet && diet !== 'none') {
+        searchParams.append('diet', diet);
+      }
+
       // Add intolerances if specified
-      if (intolerances) {
-        searchParams.append('intolerances', intolerances.replace('-free', ''));
+      if (intolerances && intolerances !== 'none') {
+        searchParams.append('intolerances', intolerances);
       }
 
       const response = await fetch(
@@ -71,7 +93,11 @@ export const handler = async (event) => {
 
       return {
         statusCode: 200,
-        body: JSON.stringify(data)
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
+        body: JSON.stringify(data.results || [])
       };
     } catch (error) {
       console.error('Search error:', error);
@@ -83,8 +109,8 @@ export const handler = async (event) => {
   }
 
   // Get recipe details endpoint
-  if (path === "/api/recipe" && method === "GET") {
-    const { id } = params;
+  if (path.startsWith("/api/recipe/")) {
+    const id = path.split("/").pop();
     
     if (!id) {
       return {
@@ -109,6 +135,10 @@ export const handler = async (event) => {
 
       return {
         statusCode: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
         body: JSON.stringify(data)
       };
     } catch (error) {
