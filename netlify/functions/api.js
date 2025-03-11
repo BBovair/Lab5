@@ -70,7 +70,8 @@ export const handler = async (event) => {
         query: ingredientList.join(' '),
         number: 12,
         addRecipeInformation: true,
-        fillIngredients: true
+        fillIngredients: true,
+        instructionsRequired: true
       });
 
       // Add diet if specified
@@ -83,12 +84,20 @@ export const handler = async (event) => {
         searchParams.append('intolerances', intolerances);
       }
 
+      console.log('Calling Spoonacular API with URL:', `https://api.spoonacular.com/recipes/complexSearch?${searchParams}`);
+
       const response = await fetch(
         `https://api.spoonacular.com/recipes/complexSearch?${searchParams}`
       );
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Spoonacular API error:', errorData);
+        throw new Error('Failed to fetch recipes from Spoonacular');
+      }
+
       const data = await response.json();
-      
-      console.log('Spoonacular API Response:', JSON.stringify(data, null, 2));
+      console.log('Spoonacular API response:', data);
 
       // Check for API errors
       if (data.code === 402) {
@@ -98,19 +107,25 @@ export const handler = async (event) => {
         };
       }
 
+      // Make sure we have results
+      if (!data.results || !Array.isArray(data.results)) {
+        console.error('Invalid response format from Spoonacular:', data);
+        throw new Error('Invalid response format from recipe service');
+      }
+
       return {
         statusCode: 200,
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
         },
-        body: JSON.stringify(data.results || [])
+        body: JSON.stringify(data.results)
       };
     } catch (error) {
       console.error('Search error:', error);
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: "Failed to fetch recipes" })
+        body: JSON.stringify({ error: error.message || "Failed to fetch recipes" })
       };
     }
   }
@@ -130,6 +145,13 @@ export const handler = async (event) => {
       const response = await fetch(
         `https://api.spoonacular.com/recipes/${id}/information?apiKey=${SPOONACULAR_API_KEY}`
       );
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Spoonacular API error:', errorData);
+        throw new Error('Failed to fetch recipe details from Spoonacular');
+      }
+
       const data = await response.json();
 
       // Check for API errors
@@ -152,7 +174,7 @@ export const handler = async (event) => {
       console.error('Recipe details error:', error);
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: "Failed to fetch recipe details" })
+        body: JSON.stringify({ error: error.message || "Failed to fetch recipe details" })
       };
     }
   }
