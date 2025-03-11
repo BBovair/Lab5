@@ -3,6 +3,11 @@ import fetch from "node-fetch";
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 
 export const handler = async (event) => {
+  console.log('API Key:', SPOONACULAR_API_KEY); // Log API key (first few chars)
+  console.log('Event path:', event.path);
+  console.log('Event method:', event.httpMethod);
+  console.log('Event body:', event.body);
+
   const path = event.path;
   const method = event.httpMethod;
   const params = event.queryStringParameters || {};
@@ -25,7 +30,9 @@ export const handler = async (event) => {
         ingredients = body.ingredients;
         diet = body.diet;
         intolerances = body.intolerances;
+        console.log('Parsed body:', { ingredients, diet, intolerances });
       } catch (error) {
+        console.error('Error parsing body:', error);
         return {
           statusCode: 400,
           body: JSON.stringify({ error: "Invalid request body" })
@@ -60,12 +67,10 @@ export const handler = async (event) => {
       // Build the API URL with parameters
       const searchParams = new URLSearchParams({
         apiKey: SPOONACULAR_API_KEY,
-        includeIngredients: ingredientList.join(','),
-        addRecipeInformation: true,
+        query: ingredientList.join(' '),
         number: 12,
-        instructionsRequired: true,
-        fillIngredients: true,
-        sort: 'max-used-ingredients'
+        addRecipeInformation: true,
+        fillIngredients: true
       });
 
       // Add diet if specified
@@ -82,6 +87,8 @@ export const handler = async (event) => {
         `https://api.spoonacular.com/recipes/complexSearch?${searchParams}`
       );
       const data = await response.json();
+      
+      console.log('Spoonacular API Response:', JSON.stringify(data, null, 2));
 
       // Check for API errors
       if (data.code === 402) {
