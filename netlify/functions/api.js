@@ -1,17 +1,8 @@
 import fetch from "node-fetch";
 
-const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
+const SPOONACULAR_API_KEY = "267fe97a98554fc0ae560c5833899fe3";
 
 export const handler = async (event) => {
-  // Check if API key is available
-  if (!SPOONACULAR_API_KEY) {
-    console.error('SPOONACULAR_API_KEY is not set in environment variables');
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "API configuration error" })
-    };
-  }
-
   const path = event.path;
   const method = event.httpMethod;
   const params = event.queryStringParameters || {};
@@ -20,10 +11,7 @@ export const handler = async (event) => {
   if (path === "/health") {
     return {
       statusCode: 200,
-      body: JSON.stringify({ 
-        status: "ok",
-        hasApiKey: !!SPOONACULAR_API_KEY
-      })
+      body: JSON.stringify({ status: "ok" })
     };
   }
 
@@ -37,9 +25,7 @@ export const handler = async (event) => {
         ingredients = body.ingredients;
         diet = body.diet;
         intolerances = body.intolerances;
-        console.log('Parsed body:', { ingredients, diet, intolerances });
       } catch (error) {
-        console.error('Error parsing body:', error);
         return {
           statusCode: 400,
           body: JSON.stringify({ error: "Invalid request body" })
@@ -90,18 +76,13 @@ export const handler = async (event) => {
         searchParams.append('intolerances', intolerances);
       }
 
-      const apiUrl = `https://api.spoonacular.com/recipes/complexSearch?${searchParams}`;
-      console.log('Calling Spoonacular API...');
-
-      const response = await fetch(apiUrl);
+      const response = await fetch(
+        `https://api.spoonacular.com/recipes/complexSearch?${searchParams}`
+      );
       const data = await response.json();
-      
-      console.log('Spoonacular API response status:', response.status);
-      console.log('Spoonacular API response:', data);
 
       // Check for API errors
       if (response.status === 401) {
-        console.error('Unauthorized - API key might be invalid');
         return {
           statusCode: 500,
           body: JSON.stringify({ error: "API authentication failed" })
@@ -115,34 +96,18 @@ export const handler = async (event) => {
         };
       }
 
-      // Make sure we have results
-      if (!data.results || !Array.isArray(data.results)) {
-        console.error('Invalid response format from Spoonacular:', data);
-        return {
-          statusCode: 500,
-          body: JSON.stringify({ 
-            error: "Invalid response format from recipe service",
-            details: data
-          })
-        };
-      }
-
       return {
         statusCode: 200,
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
         },
-        body: JSON.stringify(data.results)
+        body: JSON.stringify(data.results || [])
       };
     } catch (error) {
-      console.error('Search error:', error);
       return {
         statusCode: 500,
-        body: JSON.stringify({ 
-          error: "Failed to fetch recipes",
-          details: error.message
-        })
+        body: JSON.stringify({ error: "Failed to fetch recipes" })
       };
     }
   }
@@ -162,16 +127,15 @@ export const handler = async (event) => {
       const response = await fetch(
         `https://api.spoonacular.com/recipes/${id}/information?apiKey=${SPOONACULAR_API_KEY}`
       );
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Spoonacular API error:', errorData);
-        throw new Error('Failed to fetch recipe details from Spoonacular');
-      }
-
       const data = await response.json();
 
-      // Check for API errors
+      if (response.status === 401) {
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ error: "API authentication failed" })
+        };
+      }
+
       if (data.code === 402) {
         return {
           statusCode: 429,
@@ -188,10 +152,9 @@ export const handler = async (event) => {
         body: JSON.stringify(data)
       };
     } catch (error) {
-      console.error('Recipe details error:', error);
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: error.message || "Failed to fetch recipe details" })
+        body: JSON.stringify({ error: "Failed to fetch recipe details" })
       };
     }
   }
