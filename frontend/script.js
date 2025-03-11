@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const intolerances = document.getElementById('intolerances').value;
 
         try {
-            const response = await fetch('/.netlify/functions/api/search', {
+            const response = await fetch('/api/search', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
             resultsContainer.innerHTML = '<p>Loading recipe details...</p>';
             errorContainer.innerHTML = '';
 
-            const response = await fetch(`/.netlify/functions/api/recipe/${recipeId}`);
+            const response = await fetch(`/api/recipe/${recipeId}`);
             
             if (!response.ok) {
                 const error = await response.json();
